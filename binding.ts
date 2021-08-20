@@ -149,7 +149,13 @@ export class ConfigTreeBinding implements Binding {
 
         let p = path.join(this.root, key)
         return stat(p)
-            .then((s) => s.isFile() ? readFile(p) : undefined)
+            .then((s) => {
+                if (s.isFile()) {
+                    return readFile(p)
+                }
+
+                return undefined
+            })
             .catch((e) => {
                 if (e.code === 'ENOENT') {
                     return undefined
@@ -186,6 +192,10 @@ export class MapBinding implements Binding {
     }
 
     getAsBytes(key: string): Promise<Buffer | undefined> {
+        if (!isValidSecretKey(key)) {
+            return Promise.resolve(undefined)
+        }
+
         return Promise.resolve(this.content.get(key))
     }
 

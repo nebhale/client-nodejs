@@ -84,6 +84,21 @@ describe('binding', () => {
                     })
             })
 
+            it('should not cache unknown keys', () => {
+                let s = new StubBinding()
+                let b = new CacheBinding(s)
+
+                return b.getAsBytes("test-unknown-key")
+                    .then((v) => {
+                        expect(v).to.be.undefined
+                        return b.getAsBytes("test-unknown-key")
+                    })
+                    .then((v) => {
+                        expect(v).to.be.undefined
+                        expect(s.getAsBytesCount).to.equal(2)
+                    })
+            })
+
             it('should return cached value', () => {
                 let s = new StubBinding()
                 let b = new CacheBinding(s)
@@ -121,6 +136,13 @@ describe('binding', () => {
                     .then((v) => expect(v).to.be.undefined)
             })
 
+            it('should return undefined for a invalid key', () => {
+                let b = new ConfigTreeBinding('testdata/test-k8s')
+
+                return b.getAsBytes('test^invalid^key')
+                    .then((v) => expect(v).to.be.undefined)
+            })
+
             it('should return buffer', () => {
                 let b = new ConfigTreeBinding('testdata/test-k8s')
 
@@ -149,6 +171,15 @@ describe('binding', () => {
                     .then((v) => expect(v).to.be.undefined)
             })
 
+            it('should return undefined for a invalid key', () => {
+                let b = new MapBinding('test-name', new Map<string, Buffer>([
+                    ['test-secret-key', Buffer.from('test-secret-value\n', 'utf8')]
+                ]))
+
+                return b.getAsBytes('test^invalid^key')
+                    .then((v) => expect(v).to.be.undefined)
+            })
+
             it('should return buffer', () => {
                 let b = new MapBinding('test-name', new Map<string, Buffer>([
                     ['test-secret-key', Buffer.from('test-secret-value\n', 'utf8')]
@@ -174,9 +205,14 @@ class StubBinding implements Binding {
 
     getNameCount = 0
 
-    getAsBytes(_: string): Promise<Buffer | undefined> {
+    getAsBytes(key: string): Promise<Buffer | undefined> {
         this.getAsBytesCount++
-        return Promise.resolve(Buffer.from('test-value', 'utf8'))
+
+        if (key == 'test-key') {
+            return Promise.resolve(Buffer.from('test-value', 'utf8'))
+        }
+
+        return Promise.resolve(undefined)
     }
 
     getName(): string {

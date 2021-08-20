@@ -14,19 +14,37 @@
  * limitations under the License.
  */
 
-import {Binding, MapBinding} from './binding'
-import {filter, find, from, fromServiceBindingRoot} from './bindings'
+import {Binding, CacheBinding, MapBinding} from './binding'
+import {cached, filter, find, from, fromServiceBindingRoot} from './bindings'
 
 import {expect} from 'chai'
 import 'mocha'
 
-
 describe('bindings', () => {
+
+    describe('cached', () => {
+
+        it('should wrap with CacheBinding', () => {
+            let b = cached(new Array<Binding>(
+                new MapBinding('test-name-1', new Map<string, Buffer>()),
+                new MapBinding('test-name-2', new Map<string, Buffer>()),
+            ))
+
+            b.forEach((c) => {
+                expect(c.constructor.name).to.equal(CacheBinding.name)
+            });
+        })
+    })
 
     describe('from', () => {
 
         it('should create empty Bindings if directory does not exist', () => {
             return from("missing")
+                .then((v) => expect(v).to.be.empty)
+        })
+
+        it('should create empty Bindings if not a directory', () => {
+            return from("testdata/additional-file")
                 .then((v) => expect(v).to.be.empty)
         })
 
@@ -126,7 +144,7 @@ describe('bindings', () => {
                 .then((v) => expect(v).to.have.length(2))
         })
 
-        it('should filter by provider', () => {
+        it('should filter by type and provider', () => {
             let b = new Array<Binding>(
                 new MapBinding('test-name-1', new Map<string, Buffer>([
                     ['type', Buffer.from('test-type-1', 'utf8')],
@@ -139,6 +157,22 @@ describe('bindings', () => {
             )
 
             return filter(b, 'test-type-1', 'test-provider-1')
+                .then((v) => expect(v).to.have.length(1))
+        })
+
+        it('should filter by provider', () => {
+            let b = new Array<Binding>(
+                new MapBinding('test-name-1', new Map<string, Buffer>([
+                    ['type', Buffer.from('test-type-1', 'utf8')],
+                    ['provider', Buffer.from('test-provider-1', 'utf8')],
+                ])),
+                new MapBinding('test-name-2', new Map<string, Buffer>([
+                    ['type', Buffer.from('test-type-1', 'utf8')],
+                    ['provider', Buffer.from('test-provider-2', 'utf8')],
+                ])),
+            )
+
+            return filter(b, undefined, 'test-provider-1')
                 .then((v) => expect(v).to.have.length(1))
         })
     })

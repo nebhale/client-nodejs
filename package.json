@@ -23,5 +23,8 @@
   "description": "",
   "dependencies": {
     "@types/node": "^16.4.13"
+  },
+  "nyc": {
+    "exclude": "**/*.spec.ts"
   }
 }

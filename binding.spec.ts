@@ -136,6 +136,13 @@ describe('binding', () => {
                     .then((v) => expect(v).to.be.undefined)
             })
 
+            it('should return undefined for a directory', () => {
+                let b = new ConfigTreeBinding('testdata/test-k8s')
+
+                return b.getAsBytes('.hidden-data')
+                    .then((v) => expect(v).to.be.undefined)
+            })
+
             it('should return undefined for a invalid key', () => {
                 let b = new ConfigTreeBinding('testdata/test-k8s')
 

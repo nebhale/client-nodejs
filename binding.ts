@@ -149,13 +149,7 @@ export class ConfigTreeBinding implements Binding {
 
         let p = path.join(this.root, key)
         return stat(p)
-            .then((s) => {
-                if (s.isFile()) {
-                    return readFile(p)
-                }
-
-                return undefined
-            })
+            .then((s) => s.isFile() ? readFile(p) : undefined)
             .catch((e) => {
                 if (e.code === 'ENOENT') {
                     return undefined

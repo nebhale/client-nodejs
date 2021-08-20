@@ -1,0 +1,6 @@
+.nyc_output/
+*.d.ts
+*.js
+*.js.map
+coverage/
+node_modules/

@@ -59,9 +59,9 @@ export interface Binding {
  * @param key the key of the entry to retrieve
  * @return the contents of a binding entry as a UTF-8 decoded {@link string} if it exists, otherwise `undefined`
  */
-export function get(binding: Binding, key: string): Promise<string | undefined> {
-    return binding.getAsBytes(key)
-        .then((b) => b?.toString('utf8').trim())
+export async function get(binding: Binding, key: string): Promise<string | undefined> {
+    const b = await binding.getAsBytes(key)
+    return b?.toString('utf8').trim()
 }
 
 /**
@@ -69,7 +69,7 @@ export function get(binding: Binding, key: string): Promise<string | undefined> 
  *
  * @return the value of the {@link PROVIDER} key if it exists, otherwise `undefined`
  */
-export function getProvider(binding: Binding): Promise<string | undefined> {
+export async function getProvider(binding: Binding): Promise<string | undefined> {
     return get(binding, PROVIDER)
 }
 
@@ -78,15 +78,12 @@ export function getProvider(binding: Binding): Promise<string | undefined> {
  *
  * @return the value of the {@link TYPE} key
  */
-export function getType(binding: Binding): Promise<string> {
-    return get(binding, TYPE)
-        .then((t) => {
-            if (t == undefined) {
-                throw new Error('binding does not contain a type')
-            }
-
-            return t
-        })
+export async function getType(binding: Binding): Promise<string> {
+    const t = await get(binding, TYPE);
+    if (t == undefined) {
+        throw new Error('binding does not contain a type')
+    }
+    return t
 }
 
 /**
@@ -103,19 +100,16 @@ export class CacheBinding implements Binding {
         this.cache = new Map<String, Buffer>()
     }
 
-    getAsBytes(key: string): Promise<Buffer | undefined> {
+    async getAsBytes(key: string): Promise<Buffer | undefined> {
         if (this.cache.has(key)) {
-            return Promise.resolve(this.cache.get(key))
+            return this.cache.get(key)
         }
 
-        return this.delegate.getAsBytes(key)
-            .then((v) => {
-                if (v != undefined) {
-                    this.cache.set(key, v)
-                }
-
-                return v
-            })
+        const v = await this.delegate.getAsBytes(key)
+        if (v != undefined) {
+            this.cache.set(key, v)
+        }
+        return v
     }
 
     getName(): string {
@@ -142,21 +136,22 @@ export class ConfigTreeBinding implements Binding {
         this.root = root
     }
 
-    getAsBytes(key: string): Promise<Buffer | undefined> {
+    async getAsBytes(key: string): Promise<Buffer | undefined> {
         if (!isValidSecretKey(key)) {
-            return Promise.resolve(undefined)
+            return undefined
         }
 
-        let p = path.join(this.root, key)
-        return stat(p)
-            .then((s) => s.isFile() ? readFile(p) : undefined)
-            .catch((e) => {
-                if (e.code === 'ENOENT') {
-                    return undefined
-                }
+        const p = path.join(this.root, key)
+        try {
+            const s = await stat(p)
+            return s.isFile() ? readFile(p) : undefined
+        } catch (e) {
+            if (e.code === 'ENOENT') {
+                return undefined
+            }
 
-                throw e
-            })
+            throw e
+        }
     }
 
     getName(): string {
@@ -185,12 +180,12 @@ export class MapBinding implements Binding {
         this.content = content
     }
 
-    getAsBytes(key: string): Promise<Buffer | undefined> {
+    async getAsBytes(key: string): Promise<Buffer | undefined> {
         if (!isValidSecretKey(key)) {
-            return Promise.resolve(undefined)
+            return undefined
         }
 
-        return Promise.resolve(this.content.get(key))
+        return this.content.get(key)
     }
 
     getName(): string {

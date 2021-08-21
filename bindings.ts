@@ -39,37 +39,35 @@ export function cached(bindings: Binding[]): Binding[] {
  *
  * @param root the root to populate the `Binding`s from
  */
-export function from(root: string): Promise<Binding[]> {
-    return stat(root)
-        .then((s) => {
-            if (!s.isDirectory()) {
-                return []
-            }
+export async function from(root: string): Promise<Binding[]> {
+    let s
+    try {
+        s = await stat(root)
+    } catch (e) {
+        if (e.code === 'ENOENT') {
+            return []
+        }
 
-            return readdir(root)
-                .then((c) => {
-                    return Promise.all(c.map((c) => {
-                        let p = path.join(root, c)
-                        return stat(p).then((s) => ({path: p, stats: s}))
-                    }))
-                })
-                .then((c) => {
-                    return c.reduce((b, c) => {
-                        if (c.stats.isDirectory()) {
-                            b.push(new ConfigTreeBinding(c.path))
-                        }
+        throw e
+    }
 
-                        return b
-                    }, new Array<Binding>())
-                })
-        })
-        .catch((e) => {
-            if (e.code === 'ENOENT') {
-                return []
-            }
+    if (!s.isDirectory()) {
+        return []
+    }
 
-            throw e
-        })
+    const c = await readdir(root);
+    const d = await Promise.all(c.map((c) => {
+        const p = path.join(root, c)
+        return stat(p).then((s) => ({path: p, stats: s}))
+    }))
+
+    return d.reduce((b, c) => {
+        if (c.stats.isDirectory()) {
+            b.push(new ConfigTreeBinding(c.path))
+        }
+
+        return b
+    }, new Array<Binding>())
 }
 
 /**
@@ -77,9 +75,9 @@ export function from(root: string): Promise<Binding[]> {
  * file system root.  If the `$SERVICE_BINDING_ROOT` environment variables is not set, an empty collection is returned.
  * If the directory does not exist, an empty collection is returned.
  */
-export function fromServiceBindingRoot(): Promise<Binding[]> {
-    let path = process.env[SERVICE_BINDING_ROOT]
-    return path == undefined ? Promise.resolve([]) : from(path)
+export async function fromServiceBindingRoot(): Promise<Binding[]> {
+    const path = process.env[SERVICE_BINDING_ROOT]
+    return path == undefined ? [] : from(path)
 }
 
 /**
@@ -108,37 +106,31 @@ export function find(bindings: Binding[], name: string): Binding | undefined {
  * @param provider the provider of `Binding` to find
  * @return the collection of ``Binding`s with a given type and provider
  */
-export function filter(bindings: Binding[], type?: string, provider?: string): Promise<Binding[]> {
-    return Promise
-        .all(bindings.map((b) => {
-            let p = Promise.resolve(true)
+export async function filter(bindings: Binding[], type?: string, provider?: string): Promise<Binding[]> {
+    const d = await Promise.all(bindings.map(async (b) => {
+        let m = true
 
-            if (type != undefined) {
-                p = p.then((m) => {
-                    return getType(b)
-                        .then((t) => m && equalsIgnoreCase(t, type))
-                })
-            }
+        if (type != undefined) {
+            const t = await getType(b)
+            m = m && equalsIgnoreCase(t, type)
+        }
 
-            if (provider != undefined) {
-                p = p.then((m) => {
-                    return getProvider(b)
-                        .then((p) => m && p != undefined && equalsIgnoreCase(p, provider))
-                })
-            }
+        if (provider != undefined) {
+            const p = await getProvider(b)
+            m = m && p != undefined && equalsIgnoreCase(p, provider)
+        }
 
-            return p.then((m) => ({binding: b, match: m}))
-        }))
-        .then((c) => {
-            return c.reduce((b, c) => {
-                    if (c.match) {
-                        b.push(c.binding)
-                    }
+        return {binding: b, match: m}
+    }))
 
-                    return b
-                },
-                new Array<Binding>())
-        })
+    return d.reduce((b, c) => {
+        if (c.match) {
+            b.push(c.binding)
+        }
+
+        return b
+    },
+    new Array<Binding>())
 }
 
 function equalsIgnoreCase(a: string, b: string): boolean {

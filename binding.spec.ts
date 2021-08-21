@@ -22,50 +22,53 @@ import 'mocha'
 
 describe('binding', () => {
 
-    it('should return string value', () => {
-        let b = new MapBinding('test-name', new Map<string, Buffer>([
+    it('should return string value', async () => {
+        const b = new MapBinding('test-name', new Map<string, Buffer>([
             ['test-secret-key', Buffer.from('test-secret-value\n', 'utf8')]
         ]))
 
-        return get(b, 'test-secret-key')
-            .then((v) => expect(v).to.equal('test-secret-value'))
+        const v = await get(b, 'test-secret-key');
+        expect(v).to.equal('test-secret-value');
     })
 
     describe('getProvider', () => {
 
-        it('should return undefined if provider is not specified', () => {
-            let b = new MapBinding('test-name', new Map<string, Buffer>())
+        it('should return undefined if provider is not specified', async () => {
+            const b = new MapBinding('test-name', new Map<string, Buffer>())
 
-            return getProvider(b)
-                .then((v) => expect(v).to.be.undefined)
+            const v = await getProvider(b);
+            expect(v).to.be.undefined;
         })
 
-        it('should return provider', () => {
-            let b = new MapBinding('test-name', new Map<string, Buffer>([
+        it('should return provider', async () => {
+            const b = new MapBinding('test-name', new Map<string, Buffer>([
                 ['provider', Buffer.from('test-provider-1', 'utf8')]
             ]))
 
-            return getProvider(b)
-                .then((v) => expect(v).to.equal('test-provider-1'))
+            const v = await getProvider(b);
+            expect(v).to.equal('test-provider-1');
         })
     })
 
     describe('getType', () => {
 
-        it('should throw error if type is not specified', () => {
-            let b = new MapBinding('test-name', new Map<string, Buffer>())
+        it('should throw error if type is not specified', async () => {
+            const b = new MapBinding('test-name', new Map<string, Buffer>())
 
-            return getType(b)
-                .catch((e) => expect(e.message).to.equal('binding does not contain a type'))
+            try {
+                await getType(b);
+            } catch (e) {
+                expect(e.message).to.equal('binding does not contain a type');
+            }
         })
 
-        it('should return provider', () => {
-            let b = new MapBinding('test-name', new Map<string, Buffer>([
+        it('should return provider', async () => {
+            const b = new MapBinding('test-name', new Map<string, Buffer>([
                 ['type', Buffer.from('test-type-1', 'utf8')]
             ]))
 
-            return getType(b)
-                .then((v) => expect(v).to.equal('test-type-1'))
+            const v = await getType(b);
+            expect(v).to.equal('test-type-1');
         })
     })
 
@@ -73,51 +76,41 @@ describe('binding', () => {
 
         describe('getsBytes', () => {
 
-            it('should retrieve uncached value', () => {
-                let s = new StubBinding()
-                let b = new CacheBinding(s)
+            it('should retrieve uncached value', async () => {
+                const s = new StubBinding()
+                const b = new CacheBinding(s)
 
-                return b.getAsBytes("test-key")
-                    .then((v) => {
-                        expect(v).to.not.be.empty
-                        expect(s.getAsBytesCount).to.equal(1)
-                    })
+                const v = await b.getAsBytes("test-key")
+                expect(v).to.not.be.empty
+                expect(s.getAsBytesCount).to.equal(1)
             })
 
-            it('should not cache unknown keys', () => {
-                let s = new StubBinding()
-                let b = new CacheBinding(s)
+            it('should not cache unknown keys', async () => {
+                const s = new StubBinding()
+                const b = new CacheBinding(s)
 
-                return b.getAsBytes("test-unknown-key")
-                    .then((v) => {
-                        expect(v).to.be.undefined
-                        return b.getAsBytes("test-unknown-key")
-                    })
-                    .then((v) => {
-                        expect(v).to.be.undefined
-                        expect(s.getAsBytesCount).to.equal(2)
-                    })
+                let v = await b.getAsBytes("test-unknown-key")
+                expect(v).to.be.undefined
+                v = await b.getAsBytes("test-unknown-key")
+                expect(v).to.be.undefined
+                expect(s.getAsBytesCount).to.equal(2)
             })
 
-            it('should return cached value', () => {
-                let s = new StubBinding()
-                let b = new CacheBinding(s)
+            it('should return cached value', async () => {
+                const s = new StubBinding()
+                const b = new CacheBinding(s)
 
-                return b.getAsBytes("test-key")
-                    .then((v) => {
-                        expect(v).to.not.be.empty
-                        return b.getAsBytes("test-key")
-                    })
-                    .then((v) => {
-                        expect(v).to.not.be.empty
-                        expect(s.getAsBytesCount).to.equal(1)
-                    })
+                let v = await b.getAsBytes("test-key")
+                expect(v).to.not.be.empty
+                v = await b.getAsBytes("test-key")
+                expect(v).to.not.be.empty
+                expect(s.getAsBytesCount).to.equal(1)
             })
         })
 
         it('should always retrieve name', () => {
-            let s = new StubBinding()
-            let b = new CacheBinding(s)
+            const s = new StubBinding()
+            const b = new CacheBinding(s)
 
             expect(b.getName()).to.not.be.empty
             expect(b.getName()).to.not.be.empty
@@ -129,37 +122,37 @@ describe('binding', () => {
 
         describe('getAsBytes', () => {
 
-            it('should return undefined for a missing key', () => {
-                let b = new ConfigTreeBinding('testdata/test-k8s')
+            it('should return undefined for a missing key', async () => {
+                const b = new ConfigTreeBinding('testdata/test-k8s')
 
-                return b.getAsBytes('test-missing-key')
-                    .then((v) => expect(v).to.be.undefined)
+                const v = await b.getAsBytes('test-missing-key')
+                expect(v).to.be.undefined
             })
 
-            it('should return undefined for a directory', () => {
-                let b = new ConfigTreeBinding('testdata/test-k8s')
+            it('should return undefined for a directory', async () => {
+                const b = new ConfigTreeBinding('testdata/test-k8s')
 
-                return b.getAsBytes('.hidden-data')
-                    .then((v) => expect(v).to.be.undefined)
+                const v = await b.getAsBytes('.hidden-data')
+                expect(v).to.be.undefined
             })
 
-            it('should return undefined for a invalid key', () => {
-                let b = new ConfigTreeBinding('testdata/test-k8s')
+            it('should return undefined for a invalid key', async () => {
+                const b = new ConfigTreeBinding('testdata/test-k8s')
 
-                return b.getAsBytes('test^invalid^key')
-                    .then((v) => expect(v).to.be.undefined)
+                const v = await b.getAsBytes('test^invalid^key')
+                expect(v).to.be.undefined
             })
 
-            it('should return buffer', () => {
-                let b = new ConfigTreeBinding('testdata/test-k8s')
+            it('should return buffer', async () => {
+                const b = new ConfigTreeBinding('testdata/test-k8s')
 
-                return b.getAsBytes('test-secret-key')
-                    .then((v) => expect(v).to.deep.equal(Buffer.from('test-secret-value\n', 'utf8')))
+                const v = await b.getAsBytes('test-secret-key')
+                expect(v).to.deep.equal(Buffer.from('test-secret-value\n', 'utf8'))
             })
         })
 
         it('should return the name', () => {
-            let b = new ConfigTreeBinding('testdata/test-k8s')
+            const b = new ConfigTreeBinding('testdata/test-k8s')
 
             expect(b.getName()).to.equal('test-k8s')
         })
@@ -169,36 +162,36 @@ describe('binding', () => {
 
         describe('getAsBytes', () => {
 
-            it('should return undefined for a missing key', () => {
-                let b = new MapBinding('test-name', new Map<string, Buffer>([
+            it('should return undefined for a missing key', async () => {
+                const b = new MapBinding('test-name', new Map<string, Buffer>([
                     ['test-secret-key', Buffer.from('test-secret-value\n', 'utf8')]
                 ]))
 
-                return b.getAsBytes('test-missing-key')
-                    .then((v) => expect(v).to.be.undefined)
+                const v = await b.getAsBytes('test-missing-key')
+                expect(v).to.be.undefined
             })
 
-            it('should return undefined for a invalid key', () => {
-                let b = new MapBinding('test-name', new Map<string, Buffer>([
+            it('should return undefined for a invalid key', async () => {
+                const b = new MapBinding('test-name', new Map<string, Buffer>([
                     ['test-secret-key', Buffer.from('test-secret-value\n', 'utf8')]
                 ]))
 
-                return b.getAsBytes('test^invalid^key')
-                    .then((v) => expect(v).to.be.undefined)
+                const v = await b.getAsBytes('test^invalid^key')
+                expect(v).to.be.undefined
             })
 
-            it('should return buffer', () => {
-                let b = new MapBinding('test-name', new Map<string, Buffer>([
+            it('should return buffer', async () => {
+                const b = new MapBinding('test-name', new Map<string, Buffer>([
                     ['test-secret-key', Buffer.from('test-secret-value\n', 'utf8')]
                 ]))
 
-                return b.getAsBytes('test-secret-key')
-                    .then((v) => expect(v).to.deep.equal(Buffer.from('test-secret-value\n', 'utf8')))
+                const v = await b.getAsBytes('test-secret-key')
+                expect(v).to.deep.equal(Buffer.from('test-secret-value\n', 'utf8'))
             })
         })
 
         it('should return the name', () => {
-            let b = new MapBinding('test-name', new Map<string, Buffer>())
+            const b = new MapBinding('test-name', new Map<string, Buffer>())
 
             expect(b.getName()).to.equal('test-name')
         })
@@ -212,14 +205,14 @@ class StubBinding implements Binding {
 
     getNameCount = 0
 
-    getAsBytes(key: string): Promise<Buffer | undefined> {
+    async getAsBytes(key: string): Promise<Buffer | undefined> {
         this.getAsBytesCount++
 
         if (key == 'test-key') {
-            return Promise.resolve(Buffer.from('test-value', 'utf8'))
+            return Buffer.from('test-value', 'utf8')
         }
 
-        return Promise.resolve(undefined)
+        return undefined
     }
 
     getName(): string {

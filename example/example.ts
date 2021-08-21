@@ -16,26 +16,23 @@
 
 import * as Bindings from '../'
 
-import { Pool } from 'pg'
+import {Pool} from 'pg'
 
 // @ts-ignore
-let conn = Bindings.fromServiceBindingRoot()
-    .then((b) => Bindings.filter(b, 'postgresql'))
-    .then((b) => {
-        if (b == undefined || b.length != 1) {
-            Promise.reject(`Incorrect number of PostgreSQL drivers: ${b == undefined ? "0" : b.length}`)
-        }
+async function main() {
+    let b = await Bindings.fromServiceBindingRoot()
+    b = await Bindings.filter(b, 'postgresql')
+    if (b == undefined || b.length != 1) {
+        throw Error(`Incorrect number of PostgreSQL drivers: ${b == undefined ? "0" : b.length}`)
+    }
 
-        return Bindings.get(b[0], 'url')
-    })
-    .then((u) => {
-        if (u == undefined) {
-            Promise.reject('No URL in binding')
-        }
+    const u = await Bindings.get(b[0], 'url')
+    if (u == undefined) {
+        throw Error('No URL in binding')
+    }
 
-        return new Pool({
-            connectionString: u
-        })
-    })
+    // @ts-ignore
+    const conn = new Pool({connectionString: u})
 
-// ...
+    // ...
+}

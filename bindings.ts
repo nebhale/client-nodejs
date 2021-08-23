@@ -20,6 +20,10 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as util from 'util'
 
+/**
+ * The name of the environment variable read to determine the bindings filesystem root.  Specified by the Kubernetes
+ * Service Binding Specification: https://github.com/k8s-service-bindings/spec#workload-projection
+ */
 export const SERVICE_BINDING_ROOT: string = 'SERVICE_BINDING_ROOT'
 
 /**
@@ -38,6 +42,7 @@ export function cached(bindings: Binding[]): Binding[] {
  * empty collection is returned.
  *
  * @param root the root to populate the `Binding`s from
+ * @return the bindings found in the root
  */
 export async function from(root: string): Promise<Binding[]> {
     let s
@@ -74,6 +79,8 @@ export async function from(root: string): Promise<Binding[]> {
  * Creates a new collection of {@link Binding}s using the `$SERVICE_BINDING_ROOT` environment variable to determine the
  * file system root.  If the `$SERVICE_BINDING_ROOT` environment variables is not set, an empty collection is returned.
  * If the directory does not exist, an empty collection is returned.
+ *
+ * @return the {@link Binding}s found in `$SERVICE_BINDING_ROOT`
  */
 export async function fromServiceBindingRoot(): Promise<Binding[]> {
     const path = process.env[SERVICE_BINDING_ROOT]
@@ -104,7 +111,7 @@ export function find(bindings: Binding[], name: string): Binding | undefined {
  * @param bindings the `Bindings`s to filter
  * @param type     the type of `Binding` to find
  * @param provider the provider of `Binding` to find
- * @return the collection of ``Binding`s with a given type and provider
+ * @return the collection of `Binding`s with a given type and provider
  */
 export async function filter(bindings: Binding[], type?: string, provider?: string): Promise<Binding[]> {
     const d = await Promise.all(bindings.map(async (b) => {

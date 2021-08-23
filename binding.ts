@@ -67,6 +67,7 @@ export async function get(binding: Binding, key: string): Promise<string | undef
 /**
  * Returns the value of the {@link PROVIDER} key.
  *
+ * @param binding the binding to read from
  * @return the value of the {@link PROVIDER} key if it exists, otherwise `undefined`
  */
 export async function getProvider(binding: Binding): Promise<string | undefined> {
@@ -76,6 +77,7 @@ export async function getProvider(binding: Binding): Promise<string | undefined>
 /**
  * Returns the value of the {@link TYPE} key.
  *
+ * @param binding the binding to read from
  * @return the value of the {@link TYPE} key
  */
 export async function getType(binding: Binding): Promise<string> {
@@ -91,10 +93,15 @@ export async function getType(binding: Binding): Promise<string> {
  */
 export class CacheBinding implements Binding {
 
-    delegate: Binding
+    private delegate: Binding
 
-    cache: Map<String, Buffer>
+    private cache: Map<String, Buffer>
 
+    /**
+     * Creates a new instance.
+     *
+     * @param delegate the {@link Binding} used to retrieve original values
+     */
     constructor(delegate: Binding) {
         this.delegate = delegate
         this.cache = new Map<String, Buffer>()

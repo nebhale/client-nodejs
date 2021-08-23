@@ -21,7 +21,7 @@ const validSecretKey: RegExp = new RegExp('^[A-Za-z0-9\-_.]+$')
  * <a href="https://kubernetes.io/docs/concepts/configuration/secret/#overview-of-secrets">Kubernetes Secret key</a>.
  *
  * @param key the key to check
- * @return `true` if the {@link string} is a valid Kubernetes Secret Key, otherwise `false`
+ * @return `true` if the {@link string} is a valid Kubernetes Secret key, otherwise `false`
  */
 export function isValidSecretKey(key: string): boolean {
     return validSecretKey.test(key)

@@ -27,4 +27,5 @@ jobs:
       run: npm build
     - name: Run Tests
       run: npm test
-    - uses: codecov/codecov-action@v2
+    - name: Report coverage
+      run: bash <(curl -s https://codecov.io/bash)

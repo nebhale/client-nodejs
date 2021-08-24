@@ -28,5 +28,3 @@ jobs:
     - name: Run Tests
       run: npm test
     - uses: codecov/codecov-action@v2
-      with:
-        verbose: true

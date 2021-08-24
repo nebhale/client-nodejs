@@ -132,7 +132,7 @@ export class CacheBinding implements Binding {
  */
 export class ConfigTreeBinding implements Binding {
 
-    root: string
+    private root: string
 
     /**
      * Creates a new `ConfigTreeBinding` instance.
@@ -172,9 +172,9 @@ export class ConfigTreeBinding implements Binding {
  */
 export class MapBinding implements Binding {
 
-    name: string
+    private name: string
 
-    content: Map<string, Buffer>
+    private content: Map<string, Buffer>
 
     /**
      * Creates a new `MapBinding` instance.

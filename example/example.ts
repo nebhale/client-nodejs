@@ -22,8 +22,8 @@ import {Pool} from 'pg'
 async function main() {
     let b = await Bindings.fromServiceBindingRoot()
     b = await Bindings.filter(b, 'postgresql')
-    if (b == undefined || b.length != 1) {
-        throw Error(`Incorrect number of PostgreSQL drivers: ${b == undefined ? "0" : b.length}`)
+    if (b.length != 1) {
+        throw Error(`Incorrect number of PostgreSQL bindings: ${b.length}`)
     }
 
     const u = await Bindings.get(b[0], 'url')

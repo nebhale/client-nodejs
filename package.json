@@ -20,7 +20,7 @@
   "keywords": [],
   "author": "Ben Hale",
   "license": "Apache-2.0",
-  "description": "`client-nodejs` is a library to access [Service Binding Specification for Kubernetes](https://k8s-service-bindings.github.io/spec/) conformant Service Binding [Workload Projections](https://k8s-service-bindings.github.io/spec/#workload-projection).",
+  "description": "A library to access [Service Binding Specification for Kubernetes](https://k8s-service-bindings.github.io/spec/) conformant Service Binding [Workload Projections](https://k8s-service-bindings.github.io/spec/#workload-projection).",
   "dependencies": {
     "@types/node": "^16.4.13"
   },

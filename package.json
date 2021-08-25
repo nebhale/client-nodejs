@@ -10,7 +10,7 @@
     "ts-node": "^10.1.0",
     "typescript": "^4.3.5"
   },
-  "name": "@nebhale/client-nodejs",
+  "name": "@nebhale/service-bindings",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {

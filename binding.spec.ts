@@ -74,7 +74,7 @@ describe('binding', () => {
 
     describe('CacheBinding', () => {
 
-        describe('getsBytes', () => {
+        describe('getAsBytes', () => {
 
             it('should retrieve uncached value', async () => {
                 const s = new StubBinding()
@@ -136,7 +136,7 @@ describe('binding', () => {
                 expect(v).to.be.undefined
             })
 
-            it('should return undefined for a invalid key', async () => {
+            it('should return undefined for an invalid key', async () => {
                 const b = new ConfigTreeBinding('testdata/test-k8s')
 
                 const v = await b.getAsBytes('test^invalid^key')
@@ -171,7 +171,7 @@ describe('binding', () => {
                 expect(v).to.be.undefined
             })
 
-            it('should return undefined for a invalid key', async () => {
+            it('should return undefined for an invalid key', async () => {
                 const b = new MapBinding('test-name', new Map<string, Buffer>([
                     ['test-secret-key', Buffer.from('test-secret-value\n', 'utf8')]
                 ]))

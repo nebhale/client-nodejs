@@ -131,13 +131,13 @@ export async function filter(bindings: Binding[], type?: string, provider?: stri
     }))
 
     return d.reduce((b, c) => {
-        if (c.match) {
-            b.push(c.binding)
-        }
+            if (c.match) {
+                b.push(c.binding)
+            }
 
-        return b
-    },
-    new Array<Binding>())
+            return b
+        },
+        new Array<Binding>())
 }
 
 function equalsIgnoreCase(a: string, b: string): boolean {

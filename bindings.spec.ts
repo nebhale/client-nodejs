@@ -20,161 +20,157 @@ import {cached, filter, find, from, fromServiceBindingRoot} from './bindings'
 import {expect} from 'chai'
 import 'mocha'
 
-describe('bindings', () => {
+it('cached', () => {
+    const b = cached(new Array<Binding>(
+        new MapBinding('test-name-1', new Map<string, Buffer>()),
+        new MapBinding('test-name-2', new Map<string, Buffer>()),
+    ))
 
-    describe('cached', () => {
+    b.forEach((c) => {
+        expect(c.constructor.name).to.equal(CacheBinding.name)
+    });
+})
 
-        it('should wrap with CacheBinding', () => {
-            const b = cached(new Array<Binding>(
-                new MapBinding('test-name-1', new Map<string, Buffer>()),
-                new MapBinding('test-name-2', new Map<string, Buffer>()),
-            ))
-
-            b.forEach((c) => {
-                expect(c.constructor.name).to.equal(CacheBinding.name)
-            });
-        })
+describe('from', () => {
+    it('missing', async () => {
+        expect(await from("missing")).to.be.empty;
     })
 
-    describe('from', () => {
-
-        it('should create empty Bindings if directory does not exist', async () => {
-            const v = await from("missing");
-            expect(v).to.be.empty;
-        })
-
-        it('should create empty Bindings if not a directory', async () => {
-            const v = await from("testdata/additional-file");
-            expect(v).to.be.empty;
-        })
-
-        it('should create Bindings', async () => {
-            const v = await from("testdata");
-            expect(v).to.have.length(3);
-        })
+    it('file', async () => {
+        expect(await from("testdata/additional-file")).to.be.empty;
     })
 
-    describe('fromServiceBindingRoot', () => {
+    it('valid', async () => {
+        expect(await from("testdata")).to.have.length(3);
+    })
+})
 
-        it('should create empty Bindings if $SERVICE_BINDING_ROOT is not set', async () => {
-            const v = await fromServiceBindingRoot();
-            expect(v).to.be.empty;
-        })
+describe('fromServiceBindingRoot', () => {
+    it('unset', async () => {
+        expect(await fromServiceBindingRoot()).to.be.empty;
+    })
 
-        it('should create Bindings', async () => {
-            const old = process.env['SERVICE_BINDING_ROOT']
-            process.env['SERVICE_BINDING_ROOT'] = 'testdata'
+    it('set', async () => {
+        const old = process.env['SERVICE_BINDING_ROOT']
+        process.env['SERVICE_BINDING_ROOT'] = 'testdata'
 
-            try {
-                const v = await fromServiceBindingRoot()
-                expect(v).to.have.length(3)
-            } finally {
-                if (old == undefined) {
-                    delete process.env.SERVICE_BINDING_ROOT
-                } else {
-                    process.env['SERVICE_BINDING_ROOT'] = old
-                }
+        try {
+            expect(await fromServiceBindingRoot()).to.have.length(3)
+        } finally {
+            if (old == undefined) {
+                delete process.env.SERVICE_BINDING_ROOT
+            } else {
+                process.env['SERVICE_BINDING_ROOT'] = old
             }
-        })
+        }
+    })
+})
+
+describe('find', () => {
+    it('missing', () => {
+        const b = new Array<Binding>(
+            new MapBinding('test-name-1', new Map<string, Buffer>()),
+        )
+
+        expect(find(b, 'test-name-2')).to.be.undefined
     })
 
-    describe('find', () => {
+    it('valid', () => {
+        const b = new Array<Binding>(
+            new MapBinding('test-name-1', new Map<string, Buffer>()),
+            new MapBinding('test-name-2', new Map<string, Buffer>()),
+        )
 
-        it('should return undefined if no Binding with name exists', () => {
-            const b = new Array<Binding>(
-                new MapBinding('test-name-1', new Map<string, Buffer>()),
-            )
+        expect(find(b, 'test-name-1')?.getName()).to.equal('test-name-1')
+    })
+})
 
-            expect(find(b, 'test-name-2')).to.be.undefined
-        })
+describe('filter', () => {
+    it('none', async () => {
+        const b = new Array<Binding>(
+            new MapBinding('test-name-1', new Map<string, Buffer>([
+                ['type', Buffer.from('test-type-1', 'utf8')],
+                ['provider', Buffer.from('test-provider-1', 'utf8')],
+            ])),
+            new MapBinding('test-name-2', new Map<string, Buffer>([
+                ['type', Buffer.from('test-type-1', 'utf8')],
+                ['provider', Buffer.from('test-provider-2', 'utf8')],
+            ])),
+            new MapBinding('test-name-3', new Map<string, Buffer>([
+                ['type', Buffer.from('test-type-2', 'utf8')],
+                ['provider', Buffer.from('test-provider-2', 'utf8')],
+            ])),
+            new MapBinding('test-name-4', new Map<string, Buffer>([
+                ['type', Buffer.from('test-type-2', 'utf8')],
+            ])),
+        )
 
-        it('should return Binding', () => {
-            const b = new Array<Binding>(
-                new MapBinding('test-name-1', new Map<string, Buffer>()),
-                new MapBinding('test-name-2', new Map<string, Buffer>()),
-            )
-
-            expect(find(b, 'test-name-1')?.getName()).to.equal('test-name-1')
-        })
+        expect(await filter(b)).to.have.length(4)
     })
 
-    describe('filter', () => {
+    it('type', async () => {
+        const b = new Array<Binding>(
+            new MapBinding('test-name-1', new Map<string, Buffer>([
+                ['type', Buffer.from('test-type-1', 'utf8')],
+                ['provider', Buffer.from('test-provider-1', 'utf8')],
+            ])),
+            new MapBinding('test-name-2', new Map<string, Buffer>([
+                ['type', Buffer.from('test-type-1', 'utf8')],
+                ['provider', Buffer.from('test-provider-2', 'utf8')],
+            ])),
+            new MapBinding('test-name-3', new Map<string, Buffer>([
+                ['type', Buffer.from('test-type-2', 'utf8')],
+                ['provider', Buffer.from('test-provider-2', 'utf8')],
+            ])),
+            new MapBinding('test-name-4', new Map<string, Buffer>([
+                ['type', Buffer.from('test-type-2', 'utf8')],
+            ])),
+        )
 
-        it('should return no Bindings', async () => {
-            const b = new Array<Binding>(
-                new MapBinding('test-name-1', new Map<string, Buffer>([
-                    ['type', Buffer.from('test-type-1', 'utf8')],
-                    ['provider', Buffer.from('test-provider-1', 'utf8')],
-                ])),
-                new MapBinding('test-name-2', new Map<string, Buffer>([
-                    ['type', Buffer.from('test-type-2', 'utf8')],
-                ])),
-            )
+        expect(await filter(b, 'test-type-1')).to.have.length(2)
+    })
 
-            const v = await filter(b, 'test-type-3');
-            expect(v).to.be.empty;
-        })
+    it('provider', async () => {
+        const b = new Array<Binding>(
+            new MapBinding('test-name-1', new Map<string, Buffer>([
+                ['type', Buffer.from('test-type-1', 'utf8')],
+                ['provider', Buffer.from('test-provider-1', 'utf8')],
+            ])),
+            new MapBinding('test-name-2', new Map<string, Buffer>([
+                ['type', Buffer.from('test-type-1', 'utf8')],
+                ['provider', Buffer.from('test-provider-2', 'utf8')],
+            ])),
+            new MapBinding('test-name-3', new Map<string, Buffer>([
+                ['type', Buffer.from('test-type-2', 'utf8')],
+                ['provider', Buffer.from('test-provider-2', 'utf8')],
+            ])),
+            new MapBinding('test-name-4', new Map<string, Buffer>([
+                ['type', Buffer.from('test-type-2', 'utf8')],
+            ])),
+        )
 
-        it('should return a single Binding', async () => {
-            const b = new Array<Binding>(
-                new MapBinding('test-name-1', new Map<string, Buffer>([
-                    ['type', Buffer.from('test-type-1', 'utf8')],
-                    ['provider', Buffer.from('test-provider-1', 'utf8')],
-                ])),
-                new MapBinding('test-name-2', new Map<string, Buffer>([
-                    ['type', Buffer.from('test-type-2', 'utf8')],
-                ])),
-            )
+        expect(await filter(b, undefined, 'test-provider-2')).to.have.length(2)
+    })
 
-            const v = await filter(b, 'test-type-1');
-            expect(v).to.have.length(1);
-        })
+    it('type and provider', async () => {
+        const b = new Array<Binding>(
+            new MapBinding('test-name-1', new Map<string, Buffer>([
+                ['type', Buffer.from('test-type-1', 'utf8')],
+                ['provider', Buffer.from('test-provider-1', 'utf8')],
+            ])),
+            new MapBinding('test-name-2', new Map<string, Buffer>([
+                ['type', Buffer.from('test-type-1', 'utf8')],
+                ['provider', Buffer.from('test-provider-2', 'utf8')],
+            ])),
+            new MapBinding('test-name-3', new Map<string, Buffer>([
+                ['type', Buffer.from('test-type-2', 'utf8')],
+                ['provider', Buffer.from('test-provider-2', 'utf8')],
+            ])),
+            new MapBinding('test-name-4', new Map<string, Buffer>([
+                ['type', Buffer.from('test-type-2', 'utf8')],
+            ])),
+        )
 
-        it('should return multiple bindings', async () => {
-            const b = new Array<Binding>(
-                new MapBinding('test-name-1', new Map<string, Buffer>([
-                    ['type', Buffer.from('test-type-1', 'utf8')],
-                    ['provider', Buffer.from('test-provider-1', 'utf8')],
-                ])),
-                new MapBinding('test-name-2', new Map<string, Buffer>([
-                    ['type', Buffer.from('test-type-1', 'utf8')],
-                ])),
-            )
-
-            const v = await filter(b, 'test-type-1');
-            expect(v).to.have.length(2);
-        })
-
-        it('should filter by type and provider', async () => {
-            const b = new Array<Binding>(
-                new MapBinding('test-name-1', new Map<string, Buffer>([
-                    ['type', Buffer.from('test-type-1', 'utf8')],
-                    ['provider', Buffer.from('test-provider-1', 'utf8')],
-                ])),
-                new MapBinding('test-name-2', new Map<string, Buffer>([
-                    ['type', Buffer.from('test-type-1', 'utf8')],
-                    ['provider', Buffer.from('test-provider-2', 'utf8')],
-                ])),
-            )
-
-            const v = await filter(b, 'test-type-1', 'test-provider-1');
-            expect(v).to.have.length(1);
-        })
-
-        it('should filter by provider', async () => {
-            const b = new Array<Binding>(
-                new MapBinding('test-name-1', new Map<string, Buffer>([
-                    ['type', Buffer.from('test-type-1', 'utf8')],
-                    ['provider', Buffer.from('test-provider-1', 'utf8')],
-                ])),
-                new MapBinding('test-name-2', new Map<string, Buffer>([
-                    ['type', Buffer.from('test-type-1', 'utf8')],
-                    ['provider', Buffer.from('test-provider-2', 'utf8')],
-                ])),
-            )
-
-            const v = await filter(b, undefined, 'test-provider-1');
-            expect(v).to.have.length(1);
-        })
+        expect(await filter(b, 'test-type-1', 'test-provider-1')).to.have.length(1)
     })
 })

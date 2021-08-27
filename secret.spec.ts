@@ -21,8 +21,7 @@ import {expect} from 'chai'
 import 'mocha'
 
 describe('isValidSecretKey', () => {
-
-    it('should identify valid keys', () => {
+    it('valid', () => {
         let valid = [
             'alpha',
             'BRAVO',
@@ -39,7 +38,7 @@ describe('isValidSecretKey', () => {
         }
     })
 
-    it('should identify invalid keys', () => {
+    it('invalid', () => {
         let invalid = [
             'lima^mike'
         ]

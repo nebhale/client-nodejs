@@ -48,7 +48,7 @@ export async function from(root: string): Promise<Binding[]> {
     let s
     try {
         s = await stat(root)
-    } catch (e) {
+    } catch (e: any) {
         if (e.code === 'ENOENT') {
             return []
         }

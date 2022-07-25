@@ -152,7 +152,7 @@ export class ConfigTreeBinding implements Binding {
         try {
             const s = await stat(p)
             return s.isFile() ? readFile(p) : undefined
-        } catch (e) {
+        } catch (e: any) {
             if (e.code === 'ENOENT') {
                 return undefined
             }

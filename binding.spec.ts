@@ -57,7 +57,7 @@ describe('getType', () => {
 
         try {
             await getType(b);
-        } catch (e) {
+        } catch (e: any) {
             expect(e.message).to.equal('binding does not contain a type');
         }
     })

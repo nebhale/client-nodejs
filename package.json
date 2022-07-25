@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "@tsconfig/recommended": "^1.0.1",
     "@types/chai": "^4.2.21",
     "@types/mocha": "^9.0.0",
     "@types/pg": "^8.6.1",
@@ -12,10 +13,16 @@
   },
   "name": "@nebhale/service-bindings",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "nyc --reporter lcovonly mocha -r ts-node/register *.spec.ts"
+    "test": "nyc --reporter lcovonly mocha -r ts-node/register *.spec.ts",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test",
+    "preversion": "npm test",
+    "version": "npm run build && git add .",
+    "postversion": "git push && git push --tags"
   },
   "keywords": [],
   "author": "Ben Hale",
@@ -27,9 +34,9 @@
   "nyc": {
     "exclude": "**/*.spec.ts"
   },
-  "directories": {
-    "example": "example"
-  },
+  "files": [
+    "lib/*"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nebhale/client-nodejs.git"

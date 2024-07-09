@@ -15,7 +15,7 @@
  */
 
 
-import {Binding, CacheBinding, ConfigTreeBinding, get, getProvider, getType, MapBinding} from './binding'
+import {Binding, CacheBinding, ConfigTreeBinding, get, getProvider, getType, MapBinding} from './binding.js'
 
 import {expect} from 'chai'
 import 'mocha'

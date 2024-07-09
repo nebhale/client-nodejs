@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Binding, CacheBinding, ConfigTreeBinding, getProvider, getType} from './binding'
+import {Binding, CacheBinding, ConfigTreeBinding, getProvider, getType} from './binding.js'
 
 import * as fs from 'fs'
 import * as path from 'path'

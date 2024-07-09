@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export * from './binding'
-export * from './bindings'
+export * from './binding.js'
+export * from './bindings.js'

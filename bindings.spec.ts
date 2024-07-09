@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Binding, CacheBinding, MapBinding} from './binding'
-import {cached, filter, find, from, fromServiceBindingRoot} from './bindings'
+import {Binding, CacheBinding, MapBinding} from './binding.js'
+import {cached, filter, find, from, fromServiceBindingRoot} from './bindings.js'
 
 import {expect} from 'chai'
 import 'mocha'

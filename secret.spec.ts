@@ -15,7 +15,7 @@
  */
 
 
-import {isValidSecretKey} from './secret'
+import {isValidSecretKey} from './secret.js'
 
 import {expect} from 'chai'
 import 'mocha'

@@ -13,11 +13,12 @@
   },
   "name": "@nebhale/service-bindings",
   "version": "1.1.0",
+  "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "nyc --reporter lcovonly mocha -r ts-node/register *.spec.ts",
+    "test": "nyc --reporter lcovonly mocha *.spec.ts",
     "prepare": "npm run build",
     "prepublishOnly": "npm test",
     "preversion": "npm test",

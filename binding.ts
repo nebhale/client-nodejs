@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isValidSecretKey} from './secret'
+import {isValidSecretKey} from './secret.js'
 
 import * as fs from 'fs'
 import * as path from 'path'

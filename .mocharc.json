@@ -1,5 +1,5 @@
 {
-  "loader": "ts-node/esm",
+  "node-option": ["import=tsx"],
   "extensions": ["ts"],
   "spec": [
     "*.spec.ts"

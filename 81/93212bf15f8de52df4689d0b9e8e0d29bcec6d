@@ -1,0 +1,19 @@
+.nvmrc
+  s_7572ae52fa8cd9::t_c6e3c81c3e4d72 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "8193212bf15f8de52df4689d0b9e8e0d29bcec6d",
+  "prompts": {},
+  "sessions": {
+    "s_7572ae52fa8cd9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a063ac-0838-73d1-872f-f21c19b500f4",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Ben Hale <nebhale@nebhale.com>"
+    }
+  }
+}

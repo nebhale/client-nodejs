@@ -5,10 +5,16 @@
 
 `client-nodejs` is a library to access [Service Binding Specification for Kubernetes](https://k8s-service-bindings.github.io/spec/) conformant Service Binding [Workload Projections](https://k8s-service-bindings.github.io/spec/#workload-projection).
 
+## Installation
+
+```shell
+npm install @nebhale/service-bindings
+```
+
 ## Example
 
 ```ts
-import * as Bindings from 'bindings'
+import * as Bindings from '@nebhale/service-bindings'
 import { Pool } from 'pg'
 
 async function main() {

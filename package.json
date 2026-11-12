@@ -32,6 +32,9 @@
   "dependencies": {
     "@types/node": "^26.0.0"
   },
+  "engines": {
+    "node": ">=22"
+  },
   "nyc": {
     "exclude": "**/*.spec.ts"
   },
